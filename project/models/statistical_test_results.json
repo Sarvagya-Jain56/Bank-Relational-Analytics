@@ -1,0 +1,121 @@
+{
+  "categorical": [
+    {
+      "predictor": "Geography",
+      "test": "Chi-square test of independence",
+      "statistic": 301.255,
+      "dof": 2,
+      "p_value": 3.8303176053541544e-66,
+      "effect_size_metric": "Cramer's V",
+      "effect_size": 0.174,
+      "effect_label": "small",
+      "significant_at_0.05": true
+    },
+    {
+      "predictor": "Gender",
+      "test": "Chi-square test of independence",
+      "statistic": 112.919,
+      "dof": 1,
+      "p_value": 2.2482100097131755e-26,
+      "effect_size_metric": "Cramer's V",
+      "effect_size": 0.106,
+      "effect_label": "small",
+      "significant_at_0.05": true
+    },
+    {
+      "predictor": "HasCrCard",
+      "test": "Chi-square test of independence",
+      "statistic": 0.471,
+      "dof": 1,
+      "p_value": 0.49237236141554686,
+      "effect_size_metric": "Cramer's V",
+      "effect_size": 0.007,
+      "effect_label": "negligible",
+      "significant_at_0.05": false
+    },
+    {
+      "predictor": "IsActiveMember",
+      "test": "Chi-square test of independence",
+      "statistic": 242.985,
+      "dof": 1,
+      "p_value": 8.785858269303703e-55,
+      "effect_size_metric": "Cramer's V",
+      "effect_size": 0.156,
+      "effect_label": "small",
+      "significant_at_0.05": true
+    },
+    {
+      "predictor": "NumOfProducts",
+      "test": "Chi-square test of independence",
+      "statistic": 1503.629,
+      "dof": 3,
+      "p_value": 0.0,
+      "effect_size_metric": "Cramer's V",
+      "effect_size": 0.388,
+      "effect_label": "moderate",
+      "significant_at_0.05": true
+    }
+  ],
+  "continuous": [
+    {
+      "predictor": "CreditScore",
+      "test": "Welch's t-test (unequal variance)",
+      "statistic": -2.635,
+      "p_value": 0.008464728991832864,
+      "mean_churned": 645.35,
+      "mean_retained": 651.85,
+      "effect_size_metric": "Cohen's d",
+      "effect_size": -0.067,
+      "effect_label": "negligible",
+      "significant_at_0.05": true
+    },
+    {
+      "predictor": "Age",
+      "test": "Welch's t-test (unequal variance)",
+      "statistic": 30.419,
+      "p_value": 4.7127272656634046e-179,
+      "mean_churned": 44.84,
+      "mean_retained": 37.41,
+      "effect_size_metric": "Cohen's d",
+      "effect_size": 0.739,
+      "effect_label": "medium",
+      "significant_at_0.05": true
+    },
+    {
+      "predictor": "Tenure",
+      "test": "Welch's t-test (unequal variance)",
+      "statistic": -1.384,
+      "p_value": 0.16635698992884454,
+      "mean_churned": 4.93,
+      "mean_retained": 5.03,
+      "effect_size_metric": "Cohen's d",
+      "effect_size": -0.035,
+      "effect_label": "negligible",
+      "significant_at_0.05": false
+    },
+    {
+      "predictor": "Balance",
+      "test": "Welch's t-test (unequal variance)",
+      "statistic": 12.471,
+      "p_value": 6.318663518527816e-35,
+      "mean_churned": 91108.54,
+      "mean_retained": 72745.3,
+      "effect_size_metric": "Cohen's d",
+      "effect_size": 0.296,
+      "effect_label": "small",
+      "significant_at_0.05": true
+    },
+    {
+      "predictor": "EstimatedSalary",
+      "test": "Welch's t-test (unequal variance)",
+      "statistic": 1.203,
+      "p_value": 0.22892461305145792,
+      "mean_churned": 101465.68,
+      "mean_retained": 99738.39,
+      "effect_size_metric": "Cohen's d",
+      "effect_size": 0.03,
+      "effect_label": "negligible",
+      "significant_at_0.05": false
+    }
+  ]
+}
