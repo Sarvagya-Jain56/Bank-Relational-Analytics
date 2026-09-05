@@ -38,8 +38,10 @@ st.markdown("<style>[data-testid='stMetricValue']{font-size:1.7rem;} .block-cont
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_PATH = os.path.join(BASE_DIR, "data", "European_Bank.csv")
 
-
-@st.cache_data
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) 
+DATA_PATH = os.path.join(BASE_DIR, "data", "European_Bank.csv")
+@st.cache_data 
 def get_data():
     return load_and_engineer(DATA_PATH)
 
