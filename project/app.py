@@ -29,7 +29,7 @@ MUTED = "#6B7280"
 
 st.markdown("<style>[data-testid='stMetricValue']{font-size:1.7rem;} .block-container{padding-top:1.5rem;}</style>", unsafe_allow_html=True)
 
-import os BASE_DIR = os.path.dirname(os.path.abspath(__file__)) DATA_PATH = os.path.join(BASE_DIR, "data", "European_Bank.csv") @st.cache_data def get_data(): return load_and_engineer(DATA_PATH)
+import os base_dir = os.path.dirname(os.path.abspath(__file__)) DATA_PATH = os.path.join(BASE_DIR, "data", "European_Bank.csv") @st.cache_data def get_data(): return load_and_engineer(DATA_PATH)
 
 
 @st.cache_data
