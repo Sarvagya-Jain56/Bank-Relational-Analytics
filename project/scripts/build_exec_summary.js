@@ -84,25 +84,26 @@ children.push(
     rows: [new TableRow({ children: [
       statCell("Overall Churn Rate", "20.4%", RED, 1870),
       statCell("Best-Retention Segment", "9.7%", GREEN, 1870),
-      statCell("Highest-Risk Segment", "36.7%", RED, 1870),
+      statCell("Annual Revenue at Risk", "$4.36M", RED, 1870),
       statCell("Premium Customers At Risk", "1,247", ACCENT, 1870),
-      statCell("Balance Exposure", "$185.6M", ACCENT, 1870),
+      statCell("Premium CLV Exposure", "$16.1M", ACCENT, 1870),
     ]})],
   }),
 
   h1("Key Findings"),
   bullet("Product depth has a sweet spot, not a straight line. Retention peaks at 2 products (92.4%); 3\u20134 products correlates with 83\u2013100% churn \u2014 a strong signal of over-selling, not loyalty, affecting 326 customers."),
   bullet("Balance does not protect against churn. Top-quartile-balance customers churn more (23.7%) than the rest of the base (19.3%). Loyalty must be read from behavior, not account value."),
-  bullet("Inactivity is the real risk \u2014 especially paired with high balance. 1,247 customers are both inactive and high-balance; they churn at 30.5% and represent $185.6M in exposure."),
+  bullet("Inactivity is the real risk \u2014 especially paired with high balance. 1,247 customers are both inactive and high-balance; they churn at 30.5% and represent an estimated $16.1M in lifetime value exposure."),
   bullet("Credit card ownership has no measurable retention effect (+0.6 percentage points) \u2014 it should not be treated as a retention lever."),
-  bullet("A simple composite score \u2014 the Relationship Strength Index, built from activity and product depth \u2014 separates customers into risk tiers with a more than 3x churn spread (Weak 40.3% vs. Strong 12.4%)."),
+  bullet("A simple composite score \u2014 the Relationship Strength Index, built from activity and product depth \u2014 separates customers into risk tiers with a more than 3x churn spread (Weak 40.3% vs. Strong 12.4%), and a 2.7x lifetime-value spread ($6,453 vs. $17,111 per customer)."),
+  bullet("Illustrative ROI modeling shows both proposed campaigns below (Premium At-Risk outreach, Inactive Disengaged re-engagement) pay back 12\u201318x their cost even under conservative assumptions \u2014 full detail in the research paper, Section 10."),
 
   h1("Recommendations"),
   dataTable(
     ["Priority", "Action", "Why"],
     [
       ["1", "Pause 3rd/4th-product cross-sell; investigate root cause", "82.7\u2013100% churn in this segment, likely mis-selling"],
-      ["2", "Launch proactive outreach to the 1,247 Premium At-Risk customers", "Highest financial exposure: $185.6M in balances"],
+      ["2", "Launch proactive outreach to the 1,247 Premium At-Risk customers", "Highest financial exposure: $16.1M in estimated lifetime value"],
       ["3", "Re-engagement campaign for Inactive Disengaged segment", "Highest churn rate of any segment: 36.7%"],
       ["4", "Redirect card-issuance retention budget elsewhere", "No measurable retention effect"],
       ["5", "Adopt RSI as a live CRM/dashboard metric", "Cheap to compute, updates in real time, 3x+ churn spread"],

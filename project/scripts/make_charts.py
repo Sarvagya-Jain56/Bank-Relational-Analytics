@@ -139,3 +139,61 @@ plt.tight_layout()
 plt.savefig("../assets/chart_effect_sizes.png", dpi=170)
 plt.close()
 print("Effect size chart generated.")
+
+# 8. CLV by engagement segment (Phase 4 - Business Impact)
+from src.clv_model import compute_clv_by_group, revenue_at_risk_summary, simulate_intervention_roi
+
+clv_seg = compute_clv_by_group(df, "EngagementSegment").sort_values("clv_per_customer", ascending=True)
+fig, ax = plt.subplots(figsize=(7.5, 4.5))
+bars = ax.barh(clv_seg.index, clv_seg["clv_per_customer"], color=BLUE, zorder=3)
+ax.set_title("Customer Lifetime Value by Engagement Segment", fontsize=13, fontweight="bold", pad=12)
+ax.spines["top"].set_visible(False); ax.spines["right"].set_visible(False)
+ax.grid(axis="x", color="#E5E7EB", linewidth=0.8, zorder=0); ax.set_axisbelow(True)
+ax.set_xlabel("Estimated CLV per customer ($)")
+for b, v in zip(bars, clv_seg["clv_per_customer"]):
+    ax.text(v + 200, b.get_y()+b.get_height()/2, f"${v:,.0f}", va="center", fontsize=9.5, fontweight="bold")
+ax.set_xlim(0, clv_seg["clv_per_customer"].max()*1.22)
+plt.tight_layout()
+plt.savefig("../assets/chart_clv_segment.png", dpi=170)
+plt.close()
+
+# 9. CLV by RSI tier
+clv_rsi = compute_clv_by_group(df, "RSI_Tier").reindex(["Weak", "Moderate", "Strong"])
+fig, ax = plt.subplots(figsize=(6.5, 4.2))
+bars = ax.bar(clv_rsi.index, clv_rsi["clv_per_customer"], color=[RED, AMBER, GREEN], zorder=3)
+ax.set_title("Customer Lifetime Value by Relationship Strength Tier", fontsize=13, fontweight="bold", pad=12)
+ax.spines["top"].set_visible(False); ax.spines["right"].set_visible(False)
+ax.grid(axis="y", color="#E5E7EB", linewidth=0.8, zorder=0); ax.set_axisbelow(True)
+ax.set_ylabel("Estimated CLV per customer ($)")
+for b, v in zip(bars, clv_rsi["clv_per_customer"]):
+    ax.text(b.get_x()+b.get_width()/2, v+300, f"${v:,.0f}", ha="center", fontsize=10, fontweight="bold")
+ax.set_ylim(0, clv_rsi["clv_per_customer"].max()*1.2)
+plt.tight_layout()
+plt.savefig("../assets/chart_clv_rsi.png", dpi=170)
+plt.close()
+
+# 10. ROI simulation comparison (two illustrative campaigns)
+roi1 = simulate_intervention_roi(df, df["PremiumAtRisk"], cost_per_customer=50, churn_reduction_pp=0.05)
+roi2 = simulate_intervention_roi(df, df["EngagementSegment"]=="Inactive Disengaged", cost_per_customer=30, churn_reduction_pp=0.08)
+labels = ["Premium At-Risk\noutreach ($50/cust,\n5pp reduction)", "Inactive Disengaged\nre-engagement ($30/cust,\n8pp reduction)"]
+costs = [roi1["campaign_cost"], roi2["campaign_cost"]]
+values = [roi1["expected_value_saved"], roi2["expected_value_saved"]]
+fig, ax = plt.subplots(figsize=(7.5, 4.5))
+x = range(len(labels)); w = 0.35
+b1 = ax.bar([i-w/2 for i in x], costs, width=w, label="Campaign cost", color=MUTED, zorder=3)
+b2 = ax.bar([i+w/2 for i in x], values, width=w, label="Expected value saved", color=GREEN, zorder=3)
+ax.set_xticks(list(x)); ax.set_xticklabels(labels, fontsize=9)
+ax.set_title("Illustrative Campaign ROI: Cost vs. Expected Value Saved", fontsize=13, fontweight="bold", pad=12)
+ax.spines["top"].set_visible(False); ax.spines["right"].set_visible(False)
+ax.grid(axis="y", color="#E5E7EB", linewidth=0.8, zorder=0); ax.set_axisbelow(True)
+ax.legend(frameon=False)
+for b in list(b1)+list(b2):
+    h = b.get_height()
+    ax.text(b.get_x()+b.get_width()/2, h+15000, f"${h:,.0f}", ha="center", fontsize=8.5, fontweight="bold")
+ax.set_ylim(0, max(values)*1.25)
+plt.tight_layout()
+plt.savefig("../assets/chart_roi_simulation.png", dpi=170)
+plt.close()
+
+print("CLV/ROI charts generated.")
+print(f"revenue_at_risk_summary: {revenue_at_risk_summary(df)}")

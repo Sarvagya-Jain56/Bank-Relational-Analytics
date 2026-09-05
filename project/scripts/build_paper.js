@@ -176,9 +176,10 @@ children.push(
   tocEntry("7. Statistical Validation of Findings", 8),
   tocEntry("8. Key Performance Indicators", 10),
   tocEntry("9. Customer Segmentation Summary", 11),
-  tocEntry("10. Recommendations", 11),
-  tocEntry("11. Limitations", 12),
-  tocEntry("12. Conclusion", 12),
+  tocEntry("10. Business Impact: CLV & Revenue at Risk", 11),
+  tocEntry("11. Recommendations", 14),
+  tocEntry("12. Limitations", 15),
+  tocEntry("13. Conclusion", 15),
   new Paragraph({ children: [new PageBreak()] }),
 );
 
@@ -189,7 +190,7 @@ children.push(
   h1("Abstract"),
   p("Retail banks routinely equate a customer's balance sheet strength with their loyalty, and their product count with their satisfaction. This paper tests both assumptions against 10,000 customer records from a European retail bank (France, Germany, Spain) with a 20.37% observed churn rate. Using engagement status (IsActiveMember), product count, and account balance as the primary behavioral signals, we built a four-segment engagement classification, five retention KPIs, and a composite Relationship Strength Index (RSI), then validated each against actual churn outcomes."),
   p("The results overturn both assumptions, and every driver reported here was confirmed with formal hypothesis testing (chi-square tests for categorical predictors, Welch's t-tests for continuous ones, both paired with effect sizes) rather than read off raw percentages alone. Balance is not protective: customers in the top balance quartile churn at a higher rate (23.7%) than the rest of the base (19.3%). Product count is not linear: retention peaks at exactly two products (92.4% retained) and collapses for three or more (17.3% and 0% retained respectively), a pattern consistent with over-selling rather than genuine cross-sell success \u2014 and formally, NumOfProducts carries the largest categorical effect size in the dataset (Cramer's V = 0.388). Engagement status is the most reliable actionable lever available \u2014 active members retain at 1.17x the rate of inactive members \u2014 and the RSI, built purely from engagement and product depth, separates customers into churn-risk tiers with a fourfold spread (Weak tier: 40.3% churn vs. Strong tier: 12.4%)."),
-  p("We conclude that retention strategy should be re-anchored around behavior \u2014 activity and product depth \u2014 rather than account value, and we flag the 3\u20134 product segment (326 customers, 85.9% churn) as an operational priority requiring root-cause investigation rather than further cross-selling."),
+  p("We conclude that retention strategy should be re-anchored around behavior \u2014 activity and product depth \u2014 rather than account value, and we flag the 3\u20134 product segment (326 customers, 85.9% churn) as an operational priority requiring root-cause investigation rather than further cross-selling. Translated into estimated dollar terms, current churn is costing this portfolio an estimated $4.36 million in annual margin, with $16.1 million in lifetime value concentrated in the 1,247-customer Premium At-Risk segment alone \u2014 giving retention efforts a clear, quantified place to start."),
 );
 
 // ---------------------------------------------------------------------
@@ -401,19 +402,65 @@ children.push(
 );
 
 // ---------------------------------------------------------------------
-// 9. RECOMMENDATIONS
+// 10. BUSINESS IMPACT (CLV & ROI)
 // ---------------------------------------------------------------------
 children.push(
-  h1("10. Recommendations"),
-  h2("10.1 Investigate, don't expand, the 3\u20134 product segment"),
+  h1("10. Business Impact: Customer Lifetime Value & Revenue at Risk"),
+  p("This section translates the segments and KPIs above into dollar terms, so retention priorities can be ranked by financial exposure, not just churn percentage. The dataset contains no disclosed revenue or margin figures, so every dollar amount below is built from two clearly labeled, adjustable assumptions: a 2.5% annual net interest margin on balance (a typical retail-bank range is 2\u20134%), and a $150/year average fee/margin per product held. These are directional estimates for prioritization, not audited financial figures \u2014 the calculation is fully parameterized in code (src/clv_model.py) so a finance team can substitute real figures in one place and every number below updates consistently."),
+  h2("10.1 Customer Lifetime Value Methodology"),
+  p("CLV is estimated with the standard marketing-analytics approach: a segment's expected customer lifetime (in years) is 1 \u00f7 its annual churn rate, multiplied by its average annual margin. A customer group churning at 10% per year has an expected lifetime of 10 years; a group churning at 37% has an expected lifetime of about 2.7 years. This is a simplification \u2014 it assumes a constant churn rate over the customer's remaining lifetime and does not discount for the time value of money \u2014 but is a widely used, defensible baseline in the absence of a full survival model."),
+  h2("10.2 Portfolio-Level Revenue at Risk"),
+  dataTable(
+    ["Metric", "Value"],
+    [
+      ["Total estimated annual margin (portfolio)", "$21,416,772"],
+      ["Overall churn rate", "20.37%"],
+      ["Expected annual revenue loss to churn", "$4,362,597"],
+      ["Premium At-Risk customers", "1,247"],
+      ["Premium At-Risk CLV per customer", "$12,892"],
+      ["Premium At-Risk total CLV exposure", "$16,076,745"],
+    ],
+    [4600, 4400],
+  ),
+  caption("Table 6. Portfolio-level revenue exposure (illustrative assumptions: 2.5% NIM, $150/product/year)"),
+  p("At current churn rates, this portfolio is losing an estimated $4.36 million in annual margin every year to attrition. The 1,247 Premium At-Risk customers alone represent over $16 million in lifetime value exposure \u2014 more than a third of one year's entire portfolio margin concentrated in 12.5% of the customer base. This is the clearest possible argument for prioritizing that segment over broad, unsegmented retention spend."),
+  h2("10.3 CLV by Segment"),
+  image("../assets/chart_clv_segment.png", 480, 288),
+  caption("Figure 8. Estimated CLV per customer by engagement segment"),
+  p("The ranking here is counter-intuitive and important: Active Engaged customers have the lowest average annual margin of any segment ($1,637/year, because they hold lower average balances) but the highest CLV ($16,943), because they retain more than four times as long as Inactive Disengaged customers. Lifetime value is driven by retention duration at least as much as by immediate account value \u2014 reinforcing this paper's central argument that engagement, not balance, is the metric to optimize."),
+  image("../assets/chart_clv_rsi.png", 440, 280),
+  caption("Figure 9. Estimated CLV per customer by Relationship Strength Index tier"),
+  p("RSI shows the same pattern in a single number: Strong-tier customers are worth an estimated $17,111 in lifetime value versus $6,453 for Weak-tier customers \u2014 a 2.7x spread, computed from a score built entirely from two fields the bank already has (activity status and product count)."),
+  h2("10.4 Illustrative Retention Campaign ROI"),
+  p("To make the KPIs actionable, two of the recommendations from Section 11 were run through a simple ROI simulator: campaign cost = customers targeted \u00d7 cost per customer; expected value saved = (customers targeted \u00d7 assumed churn-rate reduction) \u00d7 that segment's CLV per customer."),
+  dataTable(
+    ["Scenario", "Targeted", "Assumed cost/reduction", "Campaign cost", "Expected value saved", "Net value", "ROI"],
+    [
+      ["Premium At-Risk outreach", "1,247", "$50/cust., 5pp", "$62,350", "$803,837", "$741,487", "11.9x"],
+      ["Inactive Disengaged re-engagement", "2,521", "$30/cust., 8pp", "$75,630", "$1,433,357", "$1,357,727", "18.0x"],
+    ],
+    [2400, 1000, 1550, 1400, 1650, 1400, 600],
+  ),
+  caption("Table 7. Illustrative campaign ROI simulations (assumptions clearly stated; not a guarantee of results)"),
+  image("../assets/chart_roi_simulation.png", 480, 288),
+  caption("Figure 10. Campaign cost vs. expected value saved, both illustrative scenarios"),
+  p("Both scenarios show strongly positive expected ROI even under conservative effectiveness assumptions (5\u20138 percentage points of churn reduction, well below the gap already observed between engagement segments). This does not guarantee a real campaign will perform this well \u2014 churn_reduction_pp is an assumption, not a measured effect \u2014 but it does show that the economics comfortably support piloting these interventions and measuring actual impact against this baseline. The interactive version of this simulator is available in the dashboard's \u201cBusiness Impact\u201d tab, where the cost and effectiveness assumptions can be adjusted live."),
+);
+
+// ---------------------------------------------------------------------
+// 11. RECOMMENDATIONS
+// ---------------------------------------------------------------------
+children.push(
+  h1("11. Recommendations"),
+  h2("11.1 Investigate, don't expand, the 3\u20134 product segment"),
   p("Pause cross-sell pushes toward a 3rd or 4th product until the root cause of the 82.7\u2013100% churn rate is understood. Recommend a targeted satisfaction survey or complaint-log review for the 326 affected customers before any further bundling campaigns."),
-  h2("10.2 Prioritize the Inactive Disengaged and Premium At-Risk segments"),
-  p("These two segments carry the highest churn rates (36.7% and 30.5%) and the clearest intervention logic: re-engagement campaigns (app nudges, relationship-manager check-ins) for Inactive Disengaged customers, and white-glove retention outreach for the 1,247 Premium At-Risk customers given their $185.6M balance exposure."),
-  h2("10.3 Stop treating credit card issuance as a retention initiative"),
+  h2("11.2 Prioritize the Inactive Disengaged and Premium At-Risk segments"),
+  p("These two segments carry the highest churn rates (36.7% and 30.5%) and the clearest intervention logic: re-engagement campaigns (app nudges, relationship-manager check-ins) for Inactive Disengaged customers, and white-glove retention outreach for the 1,247 Premium At-Risk customers given their estimated $16.1M in lifetime value exposure (Section 10.2)."),
+  h2("11.3 Stop treating credit card issuance as a retention initiative"),
   p("Redirect budget currently aimed at credit card cross-sell-for-retention purposes toward the engagement-first initiatives above, since card ownership shows no measurable retention effect in this data."),
-  h2("10.4 Adopt the Relationship Strength Index as an ongoing CRM metric"),
+  h2("11.4 Adopt the Relationship Strength Index as an ongoing CRM metric"),
   p("RSI is cheap to compute (built from two fields already captured at account level), updates in real time, and shows a 3\u20134x churn spread between tiers. Recommend surfacing RSI directly in the relationship-manager dashboard delivered alongside this paper."),
-  h2("10.5 Open a market-specific review for Germany"),
+  h2("11.5 Open a market-specific review for Germany"),
   p("Germany's churn rate (32.4%) is roughly double the other two markets and falls outside this project's core engagement/product scope \u2014 recommend a follow-up study isolating whether this is a product-fit, pricing, or competitive issue specific to that market."),
 );
 
@@ -421,7 +468,7 @@ children.push(
 // 10. LIMITATIONS
 // ---------------------------------------------------------------------
 children.push(
-  h1("11. Limitations"),
+  h1("12. Limitations"),
   bullet("Single time snapshot: the dataset reflects one point in time (2025), so trend and seasonality cannot be assessed."),
   bullet("No explicit churn reason is captured; the 3\u20134-product \u201cover-selling\u201d explanation is the most consistent read of the pattern but is inferred, not directly evidenced, and should be confirmed with qualitative data (complaints, surveys, exit interviews)."),
   bullet("All relationships reported are correlational. Engagement, product depth, and balance are associated with churn; this analysis does not establish causal direction."),
@@ -432,7 +479,7 @@ children.push(
 // 11. CONCLUSION
 // ---------------------------------------------------------------------
 children.push(
-  h1("12. Conclusion"),
+  h1("13. Conclusion"),
   p("This project reframes customer churn from a behavioral and relationship-strength perspective rather than a demographic or account-value one. Three assumptions commonly used to guide retention strategy \u2014 that more products signal more loyalty, that a high balance signals safety, and that card ownership builds stickiness \u2014 are each contradicted by this data. What does predict retention reliably is engagement, measured simply as activity status, combined with a moderate (not maximal) product depth. The Relationship Strength Index operationalizes this into a single, trackable score, and the accompanying Streamlit dashboard puts all of the above into the hands of relationship managers for day-to-day use."),
 );
 

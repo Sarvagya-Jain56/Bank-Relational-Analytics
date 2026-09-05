@@ -18,9 +18,11 @@ Retention peaks at **2 products** (7.6% churn) and collapses at 3–4 products (
 │   └── European_Bank.csv       # Source dataset (10,000 rows)
 ├── src/
 │   ├── engagement_engine.py    # Feature engineering, segmentation, KPI math (single source of truth)
-│   └── statistical_tests.py    # Chi-square / Welch's t-test validation suite
+│   ├── statistical_tests.py    # Chi-square / Welch's t-test validation suite
+│   └── clv_model.py            # Customer Lifetime Value & revenue-at-risk / ROI modeling
 ├── tests/
-│   └── test_engagement_engine.py   # 16 unit tests (pytest)
+│   ├── test_engagement_engine.py   # 16 unit tests (pytest)
+│   └── test_clv_model.py           # 18 unit tests (pytest)
 ├── scripts/
 │   ├── make_charts.py          # Regenerates all report chart images
 │   ├── build_paper.js          # Regenerates the research paper (.docx)
@@ -81,6 +83,6 @@ docker run -p 8501:8501 retention-dashboard
 | 1 | Data foundation — EDA, feature engineering, KPIs, dashboard, paper | Done |
 | 2 | Statistical validation — hypothesis testing, effect sizes | Done |
 | 3 | Production engineering — tests, CI, Docker, repo structure | Done |
-| 4 | Business impact — Customer Lifetime Value, revenue-at-risk modeling | Planned |
+| 4 | Business impact — Customer Lifetime Value, revenue-at-risk, ROI simulation | Done |
 | 5 | Predictive modeling — churn classifier, explainability (SHAP) | Planned |
 | 6 | Final polish — model card, architecture docs | Planned |

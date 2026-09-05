@@ -36,3 +36,6 @@ jobs:
 
       - name: Run statistical validation suite
         run: python src/statistical_tests.py
+
+      - name: Run CLV / revenue-at-risk model
+        run: python src/clv_model.py

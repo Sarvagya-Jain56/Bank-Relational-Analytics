@@ -8,6 +8,7 @@ Run locally with:
 Expects: data/European_Bank.csv, src/engagement_engine.py, src/statistical_tests.py
 """
 
+import os
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -15,6 +16,10 @@ import plotly.graph_objects as go
 
 from src.engagement_engine import load_and_engineer, compute_kpis, segment_summary
 from src.statistical_tests import run_full_report, format_p
+from src.clv_model import (
+    compute_annual_margin, compute_clv_by_group, revenue_at_risk_summary,
+    simulate_intervention_roi, DEFAULT_ANNUAL_NIM_RATE, DEFAULT_ANNUAL_FEE_PER_PRODUCT,
+)
 
 # ---------------------------------------------------------------------------
 # Page setup
@@ -30,9 +35,13 @@ MUTED = "#6B7280"
 st.markdown("<style>[data-testid='stMetricValue']{font-size:1.7rem;} .block-container{padding-top:1.5rem;}</style>", unsafe_allow_html=True)
 
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_PATH = os.path.join(BASE_DIR, "data", "European_Bank.csv")
+
+
 @st.cache_data
 def get_data():
-    return load_and_engineer("data/European_Bank.csv")
+    return load_and_engineer(DATA_PATH)
 
 
 @st.cache_data
@@ -87,10 +96,10 @@ k5.metric("Best-Retention Product Count", f"{best_product} products")
 
 st.divider()
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "Engagement vs Churn Overview", "Product Utilization Impact",
     "High-Value Disengaged Detector", "Retention Strength Scoring",
-    "Statistical Validation",
+    "Statistical Validation", "Business Impact (CLV & ROI)",
 ])
 
 with tab1:
@@ -215,3 +224,62 @@ with tab5:
         "is negligible, so it isn't a useful lever for retention strategy. NumOfProducts has both significance "
         "and the largest effect size of any categorical driver \u2014 that's why it's the headline finding."
     )
+
+with tab6:
+    st.subheader("Customer Lifetime Value & Revenue at Risk")
+    st.warning(
+        "\u26a0\ufe0f **This dataset has no real revenue/margin figures.** Every dollar amount on this tab is "
+        "computed from the adjustable assumptions in the sidebar below, not disclosed bank financials. "
+        "Treat these as directional / illustrative, useful for comparing segments \u2014 not audited numbers."
+    )
+
+    with st.expander("\U0001F527 Financial assumptions (adjust these)", expanded=False):
+        ac1, ac2 = st.columns(2)
+        nim_rate = ac1.slider("Annual net interest margin rate", 0.5, 5.0, DEFAULT_ANNUAL_NIM_RATE*100, 0.1, format="%.1f%%") / 100
+        fee_per_product = ac2.number_input("Annual fee/margin per product held ($)", 0, 1000, DEFAULT_ANNUAL_FEE_PER_PRODUCT, 10)
+
+    summary = revenue_at_risk_summary(df, nim_rate, fee_per_product)
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Total Annual Margin (portfolio)", f"${summary['total_annual_margin']:,.0f}")
+    m2.metric("Expected Annual Revenue Loss to Churn", f"${summary['expected_annual_revenue_loss']:,.0f}")
+    m3.metric("Premium At-Risk Total CLV Exposure", f"${summary['premium_at_risk_total_clv']:,.0f}")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        clv_seg = compute_clv_by_group(df, "EngagementSegment", nim_rate, fee_per_product).sort_values("clv_per_customer")
+        fig8 = px.bar(clv_seg.reset_index(), x="clv_per_customer", y="EngagementSegment", orientation="h",
+                      text=clv_seg["clv_per_customer"].map(lambda v: f"${v:,.0f}"),
+                      title="CLV per Customer by Engagement Segment", labels={"clv_per_customer": "CLV ($)"})
+        fig8.update_traces(textposition="outside", marker_color=PRIMARY)
+        st.plotly_chart(fig8, use_container_width=True)
+    with col2:
+        clv_rsi = compute_clv_by_group(df, "RSI_Tier", nim_rate, fee_per_product).reindex(["Weak", "Moderate", "Strong"])
+        fig9 = px.bar(clv_rsi.reset_index(), x="RSI_Tier", y="clv_per_customer",
+                      text=clv_rsi["clv_per_customer"].map(lambda v: f"${v:,.0f}"),
+                      color="RSI_Tier", color_discrete_map={"Weak": DANGER, "Moderate": WARN, "Strong": GOOD},
+                      title="CLV per Customer by RSI Tier", labels={"clv_per_customer": "CLV ($)"})
+        fig9.update_traces(textposition="outside")
+        fig9.update_layout(showlegend=False)
+        st.plotly_chart(fig9, use_container_width=True)
+
+    st.divider()
+    st.subheader("\U0001F4B0 Retention campaign ROI simulator")
+    st.caption("Pick a target segment and set assumed campaign cost/effectiveness \u2014 this is a what-if calculator, not a forecast.")
+
+    seg_choice = st.selectbox("Target segment", ["Premium At-Risk (inactive + high balance)"] + sorted(df["EngagementSegment"].unique().tolist()))
+    rc1, rc2 = st.columns(2)
+    cost = rc1.number_input("Campaign cost per customer ($)", 1, 1000, 50, 5)
+    reduction = rc2.slider("Assumed churn reduction (percentage points)", 1, 30, 5, 1) / 100
+
+    target_mask = df["PremiumAtRisk"] if seg_choice.startswith("Premium At-Risk") else (df["EngagementSegment"] == seg_choice)
+    try:
+        roi = simulate_intervention_roi(df, target_mask, cost, reduction, nim_rate, fee_per_product)
+        r1, r2, r3, r4 = st.columns(4)
+        r1.metric("Customers targeted", f"{roi['customers_targeted']:,}")
+        r2.metric("Campaign cost", f"${roi['campaign_cost']:,.0f}")
+        r3.metric("Expected value saved", f"${roi['expected_value_saved']:,.0f}")
+        roi_color = "normal" if roi["net_value"] >= 0 else "inverse"
+        r4.metric("Net value / ROI", f"${roi['net_value']:,.0f}", delta=f"{roi['roi_ratio']:.1f}x return")
+    except ValueError:
+        st.warning("No customers match this segment with the current sidebar filters.")
+
